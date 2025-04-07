@@ -11,10 +11,16 @@ app.use(cors());
 // Importação de rotas
 const userRoutes = require('./routes/userRoutes');
 const bancoRoutes = require('./routes/banco.routes'); // 🔥 Nova rota dos bancos de leite
+const doacaoRoutes = require('./routes/doacaoRoutes');
 
 // Rotas
 app.use('/usuarios', userRoutes);
 app.use('/bancos', bancoRoutes); // 🔥 Nova rota para os bancos de leite
+app.use('/doacao', doacaoRoutes);
+console.log('doacaoRoutes carregado');
+
+app.use('/bancos-de-leite', bancoRoutes);
+
 
 // Rota inicial de teste
 app.get('/', (req, res) => {

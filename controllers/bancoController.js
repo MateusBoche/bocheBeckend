@@ -3,12 +3,10 @@ const pool = require('../config/db');
 exports.buscarMaisProximo = async (req, res) => {
   let { latitude, longitude } = req.body;
 
-  // Validação simples
   if (!latitude || !longitude) {
     return res.status(400).json({ error: 'Latitude e longitude são obrigatórias' });
   }
 
-  // Garantir que são números
   latitude = parseFloat(latitude);
   longitude = parseFloat(longitude);
 
@@ -41,7 +39,18 @@ exports.buscarMaisProximo = async (req, res) => {
     console.error('Erro ao buscar banco de leite mais próximo:', error);
     res.status(500).json({
       error: 'Erro no servidor',
-      detalhe: error.message // útil para debug
+      detalhe: error.message
     });
+  }
+};
+
+// ✅ NOVO MÉTODO para retornar todos os bancos de leite
+exports.buscarTodos = async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM bancos_de_leite');
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error('Erro ao buscar todos os bancos de leite:', error);
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 };

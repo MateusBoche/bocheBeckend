@@ -3,8 +3,10 @@ const express = require('express');
 const router = express.Router();
 const bancoController = require('../controllers/bancoController');
 
-// De: router.get('/proximos', bancoController.buscarMaisProximo);
-// Para:
+// Rota para buscar todos os bancos de leite
+router.get('/', bancoController.buscarTodos);
+
+// Rota para buscar o banco mais próximo
 router.post('/proximos', bancoController.buscarMaisProximo);
 
 module.exports = router;
