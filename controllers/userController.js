@@ -1,11 +1,11 @@
 const User = require('../models/userModel');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const segredo = process.env.JWT_SECRET;
 
 exports.cadastrarUsuario = async (req, res) => {
     try {
-        const { nome, email, telefone, cpf, senha, doadora, receptora, profissional, latitude, longitude, quantidade_ml, id_cidade } = req.body;
+        const { nome, email, telefone, cpf, senha, doadora, receptora, profissional, latitude, longitude, id_cidade } = req.body;
 
         const usuarioExistente = await User.buscarPorEmailOuCPF(email, cpf);
         if (usuarioExistente) {
@@ -100,18 +100,37 @@ exports.perfilUsuario = async (req, res) => {
     }
 };
 
+// Atualizar perfil do usuário autenticado
 exports.atualizarPerfilUsuario = async (req, res) => {
-  const userId = req.usuario.id; // `usuario` vem do token decodificado
-  const { nome, email, telefone, cpf } = req.body;
+    try {
+        const { nome, telefone, senha_antiga, nova_senha } = req.body;
 
-  try {
-    await pool.query(
-      'UPDATE usuarios SET nome = $1, email = $2, telefone = $3, cpf = $4 WHERE id = $5',
-      [nome, email, telefone, cpf, userId]
-    );
-    res.json({ mensagem: 'Perfil atualizado com sucesso!' });
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ erro: 'Erro ao atualizar perfil!' });
-  }
+        const usuario = await User.buscarPorId(req.usuario.id);
+        if (!usuario) {
+            return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        }
+
+        let novaHash = null;
+
+        // Verifica senha antiga se for trocar senha
+        if (nova_senha) {
+            if (!senha_antiga) {
+                return res.status(400).json({ erro: 'Senha antiga obrigatória para trocar a senha.' });
+            }
+
+            const senhaCorreta = await bcrypt.compare(senha_antiga, usuario.senha);
+            if (!senhaCorreta) {
+                return res.status(401).json({ erro: 'Senha antiga incorreta.' });
+            }
+
+            novaHash = await bcrypt.hash(nova_senha, 10);
+        }
+
+        await User.atualizarPerfil(req.usuario.id, nome, telefone, novaHash);
+
+        return res.status(200).json({ mensagem: 'Perfil atualizado com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao atualizar perfil:', error);
+        return res.status(500).json({ erro: 'Erro ao atualizar perfil.' });
+    }
 };
