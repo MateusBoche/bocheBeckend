@@ -5,7 +5,19 @@ const segredo = process.env.JWT_SECRET;
 
 exports.cadastrarUsuario = async (req, res) => {
     try {
-        const { nome, email, telefone, cpf, senha, doadora, receptora, profissional, latitude, longitude, id_cidade } = req.body;
+        const {
+            nome,
+            email,
+            telefone,
+            cpf,
+            senha,
+            doadora,
+            receptora,
+            profissional,
+            latitude,
+            longitude,
+            id_cidade
+        } = req.body;
 
         const usuarioExistente = await User.buscarPorEmailOuCPF(email, cpf);
         if (usuarioExistente) {
@@ -23,8 +35,8 @@ exports.cadastrarUsuario = async (req, res) => {
             doadora,
             receptora,
             profissional,
-            latitude,
-            longitude,
+            latitude: latitude || null,
+            longitude: longitude || null,
             id_cidade
         });
 
